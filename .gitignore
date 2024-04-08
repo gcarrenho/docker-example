@@ -16,6 +16,10 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+lintReport.xml
+testCoverage.*
+/output
+/tmp
 
 # Go workspace file
 go.work

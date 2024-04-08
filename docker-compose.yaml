@@ -1,0 +1,139 @@
+version: "3.8"
+
+# Definition of volumes
+volumes:
+  mysqldbdata:
+  #miniodata:
+  #sonarqube_conf:
+  #sonarqube_data:
+  #sonarqube_extensions:
+  #sonarqube_logs:
+  #sonarqube_db:
+  #postgresql:
+  #postgresql_data:
+
+# Definition of networks
+networks:
+  internal:
+
+services:
+  # Main application
+  docker-example-app:
+    container_name: docker-example-app
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: production
+      args:
+        USER_UID: 1002
+        GO_VERSION: '1.22.2'
+        ALPINE_VERSION: '3.19'
+    ports:
+      - 45475:8080
+    #networks:
+    #  internal:
+    #    aliases:
+    #      - docker-example-app
+    depends_on:
+       mysql-db:
+         condition: service_healthy
+    environment:
+      - no_proxy=127.0.0.1,localhost,15.83.0.0/20,192.168.0.0/20,.hpicorp.net,.hpicloud.net,mysql-db
+      - NO_PROXY=127.0.0.1,localhost,15.83.0.0/20,192.168.0.0/20,.hpicorp.net,.hpicloud.net,mysql-db
+
+  # MySQL database
+  mysql-db:
+    image: mysql:latest
+    container_name: mysqldb-example
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: developer
+      MYSQL_DATABASE: exampledb
+      MYSQL_ROOT_HOST: '%'
+      #MYSQL_PASSWORD: 1234
+    volumes:
+      - mysqldbdata:/var/lib/mysql
+      - ./databases/mysql/scripts:/docker-entrypoint-initdb.d
+    ports:
+      - 3308:3306
+    #networks:
+    #  internal:
+    #    aliases:
+    #      - docker-example-app-mysqldb
+    healthcheck:
+      test: mysql --user=root --password=developer -e 'SELECT 1'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # MinIO
+#  docker-example-minio:
+#    image: quay.io/minio/minio:latest
+#    container_name: docker-example-minio
+#    command: server /data --address 0.0.0.0:9001 --console-address 0.0.0.0:9002
+    # Avoid ports 9000 as they are used in the pipeline
+#    ports:
+#      - "7000:9001"
+#      - "7001:9002"
+#    volumes:
+#      - miniodata:/data
+#    environment:
+#      MINIO_ROOT_USER: minioadmin
+#      MINIO_ROOT_PASSWORD: minioadminpassword
+#    healthcheck:
+#      test: [ "CMD", "mc", "ready", "local" ]
+#      interval: 10s
+#      timeout: 10s
+#      retries: 5
+#    networks:
+#      internal:
+#        aliases:
+#          - minio
+  
+
+#  sonar-scanner-apply:
+#    container_name: sonar-scanner
+#    build:
+#      dockerfile: sonarq.Dockerfile
+#      context: .
+#      #target: production
+#      args:
+        #USER_UID: 1002
+#        GO_VERSION: '1.22.2'
+#        ALPINE_VERSION: '3.19'
+    #ports:
+      #- 45475:8080
+#    depends_on:
+#      - sonarqube
+
+  # SonarQube
+#  sonarqube:
+#    image: sonarqube:latest
+#    container_name: sonarqube
+#    depends_on:
+#      - db
+#    ports:
+#      - "9003:9000"
+#    networks:
+#      internal:
+#        aliases:
+#          - sonarq
+#    environment:
+#      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonarqube-db:5432/sonar  # URL of db
+#      - SONARQUBE_JDBC_USERNAME=sonarqube  # user of db
+#      - SONARQUBE_JDBC_PASSWORD=sonarqube  # password of db
+#    volumes:
+#      - sonarqube_conf:/opt/sonarqube/conf
+#      - sonarqube_data:/opt/sonarqube/data
+#      - sonarqube_extensions:/opt/sonarqube/extensions
+#      - sonarqube_logs:/opt/sonarqube/logs
+
+#  db:
+#    image: postgres:12
+#    restart: unless-stopped
+#    environment:
+#      POSTGRES_USER: sonar
+#      POSTGRES_PASSWORD: sonar
+#    volumes:
+#      - postgresql:/var/lib/postgresql
+#      - postgresql_data:/var/lib/postgresql/data
