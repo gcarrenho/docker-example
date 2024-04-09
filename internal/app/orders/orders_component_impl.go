@@ -1,5 +1,7 @@
 package orders
 
+import "context"
+
 type OrdersComponentImpl struct {
 	ordersRepository mysqlOrdersRepository
 }
@@ -10,6 +12,6 @@ func NewOrdersComponentImpl(ordersRepository mysqlOrdersRepository) *OrdersCompo
 	}
 }
 
-func (o *OrdersComponentImpl) FindOrderByOrderNumber(orderNumber string) (OrdersResponse, error) {
-	return o.ordersRepository.getOrderByOrderNUmber(orderNumber)
+func (o *OrdersComponentImpl) FindOrderByOrderNumber(ctx context.Context, orderNumber string) (OrdersResponse, error) {
+	return o.ordersRepository.getOrderByOrderNumber(ctx, orderNumber)
 }

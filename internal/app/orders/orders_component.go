@@ -1,5 +1,7 @@
 package orders
 
+import "context"
+
 type OrdersComponent interface {
-	FindOrderByOrderNumber(orderNumber string) (OrdersResponse, error)
+	FindOrderByOrderNumber(ctx context.Context, orderNumber string) (OrdersResponse, error)
 }

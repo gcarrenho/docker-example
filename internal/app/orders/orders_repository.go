@@ -1,5 +1,7 @@
 package orders
 
+import "context"
+
 type OrdersRepository interface {
-	getOrderByOrderNUmber(orderNumber string) (OrdersResponse, error)
+	getOrderByOrderNUmber(ctx context.Context, orderNumber string) (OrdersResponse, error)
 }

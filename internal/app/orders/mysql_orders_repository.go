@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"context"
 	"database/sql"
 )
 
@@ -14,9 +15,9 @@ func NewMYSQLOrdersRepository(db *sql.DB) *mysqlOrdersRepository {
 	}
 }
 
-func (o *mysqlOrdersRepository) getOrderByOrderNUmber(orderNumber string) (OrdersResponse, error) {
+func (o *mysqlOrdersRepository) getOrderByOrderNumber(ctx context.Context, orderNumber string) (OrdersResponse, error) {
 	query := "SELECT orderNumber, currencyCode, amount, created_at FROM orders WHERE orderNumber = ?"
-	row := o.db.QueryRow(query, orderNumber)
+	row := o.db.QueryRowContext(ctx, query, orderNumber)
 
 	var order OrdersResponse
 
