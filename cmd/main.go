@@ -45,11 +45,11 @@ func main() {
 	defer db.Close()
 
 	mysqlOrdersRepository := orders.NewMYSQLOrdersRepository(db)
-	ordersComponent := orders.NewOrdersComponentImpl(*mysqlOrdersRepository)
+	ordersComponent := orders.NewOrdersComponentImpl(mysqlOrdersRepository)
 
 	router := setupRouter()
 
-	web.NewOrdersHandlers(router, ordersComponent)
+	web.NewOrdersHandlers(router.Group("/"), ordersComponent)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	runServer(ctx, stop, router)

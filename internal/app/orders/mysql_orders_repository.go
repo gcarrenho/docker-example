@@ -1,7 +1,9 @@
 package orders
 
 import (
+	"context"
 	"database/sql"
+	"docker-example/internal/app/orders/model"
 )
 
 type mysqlOrdersRepository struct {
@@ -14,15 +16,15 @@ func NewMYSQLOrdersRepository(db *sql.DB) *mysqlOrdersRepository {
 	}
 }
 
-func (o *mysqlOrdersRepository) getOrderByOrderNUmber(orderNumber string) (OrdersResponse, error) {
+func (o *mysqlOrdersRepository) GetOrderByOrderNumber(ctx context.Context, orderNumber string) (model.OrdersResponse, error) {
 	query := "SELECT orderNumber, currencyCode, amount, created_at FROM orders WHERE orderNumber = ?"
-	row := o.db.QueryRow(query, orderNumber)
+	row := o.db.QueryRowContext(ctx, query, orderNumber)
 
-	var order OrdersResponse
+	var order model.OrdersResponse
 
 	err := row.Scan(&order.OrderNumber, &order.Currency, &order.Amount, &order.CreatedAt)
 	if err != nil {
-		return OrdersResponse{}, err
+		return model.OrdersResponse{}, err
 	}
 
 	return order, nil

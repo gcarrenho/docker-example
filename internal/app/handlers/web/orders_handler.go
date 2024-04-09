@@ -12,21 +12,23 @@ type OrdersHandlers struct {
 	ordersComponent orders.OrdersComponent
 }
 
-func NewOrdersHandlers(router *gin.Engine, ordersComponent orders.OrdersComponent) {
+func NewOrdersHandlers(router *gin.RouterGroup, ordersComponent orders.OrdersComponent) {
 	ordersInternalHandler := OrdersHandlers{
 		ordersComponent: ordersComponent,
 	}
 
-	router.GET("/orders/:orderNumber", ordersInternalHandler.getOrder)
+	router.GET("orders/:orderNumber", ordersInternalHandler.getOrder)
 }
 
 func (oh *OrdersHandlers) getOrder(c *gin.Context) {
 	orderNumber := c.Param("orderNumber")
 
-	orderResponse, err := oh.ordersComponent.FindOrderByOrderNumber(orderNumber)
+	orderResponse, err := oh.ordersComponent.FindOrderByOrderNumber(c, orderNumber)
 	if err != nil {
 		log.Error().Msg("Finding order by order number: " + err.Error())
-		c.AbortWithStatusJSON(http.StatusInternalServerError, "can not find the order")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "can not find the order",
+		})
 		return
 	}
 

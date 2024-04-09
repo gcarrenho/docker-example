@@ -1,5 +1,10 @@
 package orders
 
+import (
+	"context"
+	"docker-example/internal/app/orders/model"
+)
+
 type OrdersComponent interface {
-	FindOrderByOrderNumber(orderNumber string) (OrdersResponse, error)
+	FindOrderByOrderNumber(ctx context.Context, orderNumber string) (model.OrdersResponse, error)
 }
