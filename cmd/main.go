@@ -49,7 +49,7 @@ func main() {
 
 	router := setupRouter()
 
-	web.NewOrdersHandlers(router, ordersComponent)
+	web.NewOrdersHandlers(router.Group("/"), ordersComponent)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	runServer(ctx, stop, router)

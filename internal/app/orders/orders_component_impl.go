@@ -3,10 +3,10 @@ package orders
 import "context"
 
 type OrdersComponentImpl struct {
-	ordersRepository mysqlOrdersRepository
+	ordersRepository ordersRepository
 }
 
-func NewOrdersComponentImpl(ordersRepository mysqlOrdersRepository) *OrdersComponentImpl {
+func NewOrdersComponentImpl(ordersRepository ordersRepository) *OrdersComponentImpl {
 	return &OrdersComponentImpl{
 		ordersRepository: ordersRepository,
 	}

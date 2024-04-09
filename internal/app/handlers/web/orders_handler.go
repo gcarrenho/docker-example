@@ -12,12 +12,12 @@ type OrdersHandlers struct {
 	ordersComponent orders.OrdersComponent
 }
 
-func NewOrdersHandlers(router *gin.Engine, ordersComponent orders.OrdersComponent) {
+func NewOrdersHandlers(router *gin.RouterGroup, ordersComponent orders.OrdersComponent) {
 	ordersInternalHandler := OrdersHandlers{
 		ordersComponent: ordersComponent,
 	}
 
-	router.GET("/orders/:orderNumber", ordersInternalHandler.getOrder)
+	router.GET("orders/:orderNumber", ordersInternalHandler.getOrder)
 }
 
 func (oh *OrdersHandlers) getOrder(c *gin.Context) {
