@@ -2,11 +2,10 @@ package web
 
 import (
 	"docker-example/internal/app/orders"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type OrdersHandlers struct {
@@ -18,17 +17,18 @@ func NewOrdersHandlers(router *gin.Engine, ordersComponent orders.OrdersComponen
 		ordersComponent: ordersComponent,
 	}
 
-	router.GET("/orders/:id", ordersInternalHandler.getOrder)
+	router.GET("/orders/:orderNumber", ordersInternalHandler.getOrder)
 }
 
 func (oh *OrdersHandlers) getOrder(c *gin.Context) {
-	ID := c.Param("id")
+	orderNumber := c.Param("orderNumber")
 
-	strID, err := strconv.ParseInt(ID, 10, 64)
+	orderResponse, err := oh.ordersComponent.FindOrderByOrderNumber(orderNumber)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "invalid id")
+		log.Error().Msg("Finding order by order number: " + err.Error())
+		c.AbortWithStatusJSON(http.StatusInternalServerError, "can not find the order")
 		return
 	}
 
-	fmt.Printf("oh.ordersComponent: %v\n", strID)
+	c.JSON(http.StatusOK, orderResponse)
 }

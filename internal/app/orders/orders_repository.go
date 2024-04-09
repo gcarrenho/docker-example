@@ -1,5 +1,5 @@
 package orders
 
 type OrdersRepository interface {
-	getOrderByID(id int64) (OrdersResponse, error)
+	getOrderByOrderNUmber(orderNumber string) (OrdersResponse, error)
 }

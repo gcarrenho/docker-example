@@ -30,16 +30,16 @@ services:
         ALPINE_VERSION: '3.19'
     ports:
       - 45475:8080
-    #networks:
-    #  internal:
-    #    aliases:
-    #      - docker-example-app
+    networks:
+      internal:
+        aliases:
+          - docker-example-app
     depends_on:
        mysql-db:
          condition: service_healthy
     environment:
-      - no_proxy=127.0.0.1,localhost,15.83.0.0/20,192.168.0.0/20,.hpicorp.net,.hpicloud.net,mysql-db
-      - NO_PROXY=127.0.0.1,localhost,15.83.0.0/20,192.168.0.0/20,.hpicorp.net,.hpicloud.net,mysql-db
+      - no_proxy=127.0.0.1,localhost,mysql-db
+      - NO_PROXY=127.0.0.1,localhost,mysql-db
 
   # MySQL database
   mysql-db:
@@ -50,16 +50,15 @@ services:
       MYSQL_ROOT_PASSWORD: developer
       MYSQL_DATABASE: exampledb
       MYSQL_ROOT_HOST: '%'
-      #MYSQL_PASSWORD: 1234
     volumes:
       - mysqldbdata:/var/lib/mysql
       - ./databases/mysql/scripts:/docker-entrypoint-initdb.d
     ports:
       - 3308:3306
-    #networks:
-    #  internal:
-    #    aliases:
-    #      - docker-example-app-mysqldb
+    networks:
+      internal:
+        aliases:
+          - docker-example-app-mysqldb
     healthcheck:
       test: mysql --user=root --password=developer -e 'SELECT 1'
       interval: 10s

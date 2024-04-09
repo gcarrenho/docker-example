@@ -23,28 +23,25 @@ const (
 	localPort = "8080"
 )
 
+// Config app
+type Config struct {
+	Environment string
+	DBConfig    mysql.MySQLConf
+}
+
 func main() {
-
-	err := loadConfig()
+	config, err := loadConfig()
 	if err != nil {
-		fmt.Println("fail loading fiile .env", err)
+		log.Error().Msg("Could not load config: " + err.Error())
+		return
 	}
 
-	// DB connection
-	dbConfig := mysql.NewMySqlConf(os.Getenv("MYSQLUSER"), os.Getenv("MYSQLPASSWORD"))
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&clientFoundRows=true",
-		dbConfig.DbUser, dbConfig.DbPassword, dbConfig.DbHost, dbConfig.DbPort, dbConfig.DbName)
-
-	db, err := dbConfig.InitMySqlDB(dsn)
+	db, err := config.DBConfig.InitMySqlDB(config.DBConfig)
 	if err != nil {
-		//logger.Error().Msg(err.Error())
-		fmt.Println("problem ", err)
-
-		panic("problem with db ")
+		log.Error().Msg("Could not initialize database: " + err.Error())
+		return
 	}
 
-	//db := dbConfig.GetDB()
 	defer db.Close()
 
 	mysqlOrdersRepository := orders.NewMYSQLOrdersRepository(db)
@@ -73,47 +70,56 @@ func setupRouter() *gin.Engine {
 
 func runServer(ctx context.Context, stop context.CancelFunc, router *gin.Engine) {
 	log.Debug().Msg("Running")
+
 	// HTTP Server
 	ginSrv := &http.Server{
 		Addr:    ":" + localPort,
 		Handler: router,
 	}
+
+	// Starting the server http in a gorutine
 	go func() {
-		runErr := ginSrv.ListenAndServe()
-		if runErr != nil && !errors.Is(runErr, http.ErrServerClosed) {
-			log.Fatal().Msg("could not start http server: " + runErr.Error())
+		if err := ginSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Msg("Could not start http server: " + err.Error())
 		}
 	}()
 
+	// Wait ending signal of context
 	<-ctx.Done()
+
+	// Stop the server and clean the resources
 	stop()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// Creating a child context with a waiting time to close the server
+	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if shutdownErr := ginSrv.Shutdown(ctx); shutdownErr != nil {
-		log.Error().Msg("Forcing shutdown: " + shutdownErr.Error())
+	// Shutdown the server
+	if err := ginSrv.Shutdown(ctxShutdown); err != nil {
+		log.Error().Msg("Forcing shutdown: " + err.Error())
 	}
+
 	log.Debug().Msg("Stopped")
 }
 
-func loadConfig() error {
-	var err error
+func loadConfig() (Config, error) {
+	var config Config
+
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
 		env = "dev"
 	}
 
-	switch env {
-	case "dev":
-		err = godotenv.Overload("../dev.env")
-	case "staging":
-		err = godotenv.Overload("../stg.env")
-	case "prod":
-		err = godotenv.Overload("../pro.env")
-	default:
-		err = godotenv.Overload("../dev.env")
+	err := godotenv.Overload(fmt.Sprintf("../%s.env", env))
+	if err != nil {
+		return config, err
 	}
 
-	return err
+	dbConfig := mysql.NewMySqlConf(os.Getenv("MYSQLUSER"), os.Getenv("MYSQLPASSWORD"))
+	config = Config{
+		Environment: env,
+		DBConfig:    dbConfig,
+	}
+
+	return config, err
 }

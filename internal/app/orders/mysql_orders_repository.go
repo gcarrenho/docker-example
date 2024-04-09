@@ -14,16 +14,14 @@ func NewMYSQLOrdersRepository(db *sql.DB) *mysqlOrdersRepository {
 	}
 }
 
-func (o *mysqlOrdersRepository) getOrderByID(id int64) (OrdersResponse, error) {
-	// Ejecutar la consulta SQL para obtener la orden por ID
-	query := "SELECT * FROM orders WHERE id = ?"
-	row := o.db.QueryRow(query, id)
+func (o *mysqlOrdersRepository) getOrderByOrderNUmber(orderNumber string) (OrdersResponse, error) {
+	query := "SELECT orderNumber, currencyCode, amount, created_at FROM orders WHERE orderNumber = ?"
+	row := o.db.QueryRow(query, orderNumber)
 
 	var order OrdersResponse
 
-	err := row.Scan(&order.OrderNumber)
+	err := row.Scan(&order.OrderNumber, &order.Currency, &order.Amount, &order.CreatedAt)
 	if err != nil {
-		// Manejar el error si ocurre
 		return OrdersResponse{}, err
 	}
 

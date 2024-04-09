@@ -10,6 +10,6 @@ func NewOrdersComponentImpl(ordersRepository mysqlOrdersRepository) *OrdersCompo
 	}
 }
 
-func (o *OrdersComponentImpl) findOrderByID(id int64) (OrdersResponse, error) {
-	return o.ordersRepository.getOrderByID(id)
+func (o *OrdersComponentImpl) FindOrderByOrderNumber(orderNumber string) (OrdersResponse, error) {
+	return o.ordersRepository.getOrderByOrderNUmber(orderNumber)
 }
