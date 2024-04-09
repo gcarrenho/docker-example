@@ -1,8 +1,0 @@
-environment:
-  VERSION: 0.1
-  ENVIRONMENT: LOCAL
-  MYSQLUSER: root
-  MYSQLPAsSWORD: developer
-  DBNAME: exampledb
-  DBHOST: 0.0.0.0
-  DBPORT: 3308
