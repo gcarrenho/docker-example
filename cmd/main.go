@@ -45,7 +45,7 @@ func main() {
 	defer db.Close()
 
 	mysqlOrdersRepository := orders.NewMYSQLOrdersRepository(db)
-	ordersComponent := orders.NewOrdersComponentImpl(*mysqlOrdersRepository)
+	ordersComponent := orders.NewOrdersComponentImpl(mysqlOrdersRepository)
 
 	router := setupRouter()
 
