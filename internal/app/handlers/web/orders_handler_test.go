@@ -1,11 +1,13 @@
 package web
 
 import (
-	"docker-example/internal/app/orders"
 	"docker-example/mocks"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"docker-example/internal/app/orders/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -18,14 +20,14 @@ type mockOrdersHandler struct {
 }
 
 func setupTest(t *testing.T, fn func()) (
-	//client *http,
 	mock mockOrdersHandler,
 	responseRecorder *httptest.ResponseRecorder,
 	router *gin.Engine,
-
 	tearDown func(),
 ) {
 	t.Helper()
+
+	gin.SetMode(gin.TestMode)
 
 	responseRecorder = httptest.NewRecorder()
 	router = gin.Default()
@@ -51,7 +53,7 @@ func TestOrdersHandler(t *testing.T) {
 		responseRecorder *httptest.ResponseRecorder,
 		route *gin.Engine,
 	){
-		"OrdersHandler": testGetOrderByOrderNumber,
+		"OrdersHandler": testGetOrder,
 	} {
 		t.Run(scenario, func(t *testing.T) {
 			mock, responseRecorder, router, tearDown := setupTest(t, nil)
@@ -61,14 +63,11 @@ func TestOrdersHandler(t *testing.T) {
 	}
 }
 
-func testGetOrderByOrderNumber(t *testing.T, mock mockOrdersHandler, responseRecorder *httptest.ResponseRecorder, router *gin.Engine) {
-
-	gin.SetMode(gin.TestMode)
-
+func testGetOrder(t *testing.T, mock mockOrdersHandler, responseRecorder *httptest.ResponseRecorder, router *gin.Engine,
+) {
 	type want struct {
 		expected string
 		httpCode int
-		err      error
 	}
 
 	tests := []struct {
@@ -77,11 +76,19 @@ func testGetOrderByOrderNumber(t *testing.T, mock mockOrdersHandler, responseRec
 		mocks func(m mockOrdersHandler)
 	}{
 		{
-			name: "Succes",
+			name: "When FindOrderByOrderNumber fails",
 
-			want: want{expected: ``, httpCode: http.StatusOK},
+			want: want{expected: `{"error":"can not find the order"}`, httpCode: http.StatusInternalServerError},
 			mocks: func(m mockOrdersHandler) {
-				m.ordersComponent.EXPECT().FindOrderByOrderNumber(gomock.Any(), "1").Return(orders.OrdersResponse{}, nil)
+				m.ordersComponent.EXPECT().FindOrderByOrderNumber(gomock.Any(), "1").Return(model.OrdersResponse{}, errors.New("some error"))
+			},
+		},
+		{
+			name: "When FindOrderByOrderNumber is Succes",
+
+			want: want{expected: `{"order_number":"","currency":"","amount":0,"creates_at":"0001-01-01T00:00:00Z"}`, httpCode: http.StatusOK},
+			mocks: func(m mockOrdersHandler) {
+				m.ordersComponent.EXPECT().FindOrderByOrderNumber(gomock.Any(), "1").Return(model.OrdersResponse{}, nil)
 			},
 		},
 	}
@@ -89,6 +96,7 @@ func testGetOrderByOrderNumber(t *testing.T, mock mockOrdersHandler, responseRec
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mocks(mock)
+			responseRecorder := httptest.NewRecorder()
 
 			req, err := http.NewRequest(http.MethodGet, "/orders/1", nil)
 			require.NoError(t, err)
@@ -96,7 +104,7 @@ func testGetOrderByOrderNumber(t *testing.T, mock mockOrdersHandler, responseRec
 			router.ServeHTTP(responseRecorder, req)
 
 			assert.Equal(t, tc.want.httpCode, responseRecorder.Code)
-			//require.JSONEq(t, tc.want.expected, w.Body.String())
+			require.JSONEq(t, tc.want.expected, responseRecorder.Body.String())
 		})
 	}
 }

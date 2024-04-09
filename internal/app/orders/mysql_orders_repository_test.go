@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"docker-example/internal/app/orders/model"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 )
@@ -48,7 +50,7 @@ func TestOrderRepository(t *testing.T) {
 func testGetOrderByOrderNumber(t *testing.T, client *mysqlOrdersRepository, sqlMock sqlmock.Sqlmock) {
 	type want struct {
 		err           error
-		orderResponse OrdersResponse
+		orderResponse model.OrdersResponse
 	}
 
 	ctx := context.Background()
@@ -64,7 +66,7 @@ func testGetOrderByOrderNumber(t *testing.T, client *mysqlOrdersRepository, sqlM
 
 			name:        "Get order number fails",
 			orderNumber: "1",
-			want:        want{err: errors.New("some error"), orderResponse: OrdersResponse{}},
+			want:        want{err: errors.New("some error"), orderResponse: model.OrdersResponse{}},
 			mocks: func(m sqlmock.Sqlmock) {
 				sqlMock.ExpectQuery("SELECT orderNumber, currencyCode, amount, created_at FROM orders WHERE orderNumber = ?").WillReturnError(errors.New("some error"))
 			},
@@ -73,7 +75,7 @@ func testGetOrderByOrderNumber(t *testing.T, client *mysqlOrdersRepository, sqlM
 
 			name:        "Get order number Successful",
 			orderNumber: "1",
-			want: want{err: nil, orderResponse: OrdersResponse{
+			want: want{err: nil, orderResponse: model.OrdersResponse{
 				OrderNumber: "1",
 				Currency:    "USD",
 				Amount:      10,
@@ -94,7 +96,7 @@ func testGetOrderByOrderNumber(t *testing.T, client *mysqlOrdersRepository, sqlM
 
 			tc.mocks(sqlMock)
 
-			orderResponse, err := client.getOrderByOrderNumber(ctx, tc.orderNumber)
+			orderResponse, err := client.GetOrderByOrderNumber(ctx, tc.orderNumber)
 
 			require.Equal(t, tc.want.err, err)
 			require.Equal(t, tc.want.orderResponse, orderResponse)

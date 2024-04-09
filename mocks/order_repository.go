@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	orders "docker-example/internal/app/orders"
+	model "docker-example/internal/app/orders/model"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -40,17 +40,17 @@ func (m *MockordersRepository) EXPECT() *MockordersRepositoryMockRecorder {
 	return m.recorder
 }
 
-// getOrderByOrderNumber mocks base method.
-func (m *MockordersRepository) getOrderByOrderNumber(ctx context.Context, orderNumber string) (orders.OrdersResponse, error) {
+// GetOrderByOrderNumber mocks base method.
+func (m *MockordersRepository) GetOrderByOrderNumber(ctx context.Context, orderNumber string) (model.OrdersResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "getOrderByOrderNumber", ctx, orderNumber)
-	ret0, _ := ret[0].(orders.OrdersResponse)
+	ret := m.ctrl.Call(m, "GetOrderByOrderNumber", ctx, orderNumber)
+	ret0, _ := ret[0].(model.OrdersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// getOrderByOrderNumber indicates an expected call of getOrderByOrderNumber.
-func (mr *MockordersRepositoryMockRecorder) getOrderByOrderNumber(ctx, orderNumber any) *gomock.Call {
+// GetOrderByOrderNumber indicates an expected call of GetOrderByOrderNumber.
+func (mr *MockordersRepositoryMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getOrderByOrderNumber", reflect.TypeOf((*MockordersRepository)(nil).getOrderByOrderNumber), ctx, orderNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockordersRepository)(nil).GetOrderByOrderNumber), ctx, orderNumber)
 }

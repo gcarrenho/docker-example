@@ -1,30 +1,39 @@
 package orders
 
-/*
-import "docker-example/mocks"
+import (
+	"context"
+	"docker-example/mocks"
+	"errors"
+	"testing"
+
+	"docker-example/internal/app/orders/model"
+
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
+)
 
 type mockOrdersComponent struct {
 	ordersRepository *mocks.MockordersRepository
 }
 
-/*
 func setupOrderComponentTest(t *testing.T, fn func()) (
 	ordersComponent *OrdersComponentImpl,
+	mock mockOrdersComponent,
 	tearDown func(),
 ) {
 	t.Helper()
 
 	mockCtrl := gomock.NewController(t)
 
-	mock := mockOrdersComponent{
+	mock = mockOrdersComponent{
 		ordersRepository: mocks.NewMockordersRepository(mockCtrl),
 	}
 
 	ordersComponent = NewOrdersComponentImpl(
-		//mock.ordersRepository,
+		mock.ordersRepository,
 	)
 
-	return ordersComponent, func() {
+	return ordersComponent, mock, func() {
 		defer mockCtrl.Finish()
 	}
 }
@@ -33,18 +42,19 @@ func TestOrdersComponent(t *testing.T) {
 	for scenario, fn := range map[string]func(
 		t *testing.T,
 		ordersComponent *OrdersComponentImpl,
+		mock mockOrdersComponent,
 	){
-		"OrdersHandler": testOrdercompGetOrderByOrderNumber,
+		"OrdersComponent": testFindOrderByOrderNumber,
 	} {
 		t.Run(scenario, func(t *testing.T) {
-			ordersComponent, tearDown := setupOrderComponentTest(t, nil)
+			ordersComponent, mock, tearDown := setupOrderComponentTest(t, nil)
 			defer tearDown()
-			fn(t, ordersComponent)
+			fn(t, ordersComponent, mock)
 		})
 	}
 }
 
-func testOrdercompGetOrderByOrderNumber(t *testing.T, ordersComponent *OrdersComponentImpl) {
+func testFindOrderByOrderNumber(t *testing.T, ordersComponent *OrdersComponentImpl, mock mockOrdersComponent) {
 	ctx := context.Background()
 
 	type params struct {
@@ -52,7 +62,7 @@ func testOrdercompGetOrderByOrderNumber(t *testing.T, ordersComponent *OrdersCom
 	}
 
 	type want struct {
-		ordersResponse OrdersResponse
+		ordersResponse model.OrdersResponse
 		err            error
 	}
 
@@ -63,26 +73,40 @@ func testOrdercompGetOrderByOrderNumber(t *testing.T, ordersComponent *OrdersCom
 		mock  func(m mockOrdersComponent)
 	}{
 		{
-			name: "Successful",
+			name: "When FindOrderByOrderNumber fails",
 			input: params{
 				orderNumber: "1",
 			},
 			want: want{
+				err: errors.New("some error"),
+			},
+			mock: func(m mockOrdersComponent) {
+				m.ordersRepository.EXPECT().GetOrderByOrderNumber(ctx, "1").Return(model.OrdersResponse{}, errors.New("some error"))
+			},
+		},
+		{
+			name: "When FindOrderByOrderNumber is Successful",
+			input: params{
+				orderNumber: "1",
+			},
+			want: want{
+				ordersResponse: model.OrdersResponse{
+					OrderNumber: "1",
+				},
 				err: nil,
 			},
 			mock: func(m mockOrdersComponent) {
-
-
+				m.ordersRepository.EXPECT().GetOrderByOrderNumber(ctx, "1").Return(model.OrdersResponse{OrderNumber: "1"}, nil)
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.mock(mock)
 			order, err := ordersComponent.FindOrderByOrderNumber(ctx, tt.input.orderNumber)
 			assert.Equal(t, tt.want.err, err)
 			assert.Equal(t, tt.want.ordersResponse, order)
 		})
 	}
 }
-*/

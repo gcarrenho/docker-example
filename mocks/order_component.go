@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	orders "docker-example/internal/app/orders"
+	model "docker-example/internal/app/orders/model"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -41,10 +41,10 @@ func (m *MockOrdersComponent) EXPECT() *MockOrdersComponentMockRecorder {
 }
 
 // FindOrderByOrderNumber mocks base method.
-func (m *MockOrdersComponent) FindOrderByOrderNumber(ctx context.Context, orderNumber string) (orders.OrdersResponse, error) {
+func (m *MockOrdersComponent) FindOrderByOrderNumber(ctx context.Context, orderNumber string) (model.OrdersResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOrderByOrderNumber", ctx, orderNumber)
-	ret0, _ := ret[0].(orders.OrdersResponse)
+	ret0, _ := ret[0].(model.OrdersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
