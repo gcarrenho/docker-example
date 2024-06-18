@@ -25,9 +25,9 @@ func (oh *OrdersHandlers) getOrder(c *gin.Context) {
 
 	orderResponse, err := oh.ordersComponent.FindOrderByOrderNumber(c, orderNumber)
 	if err != nil {
-		log.Error().Msg("Finding order by order number: " + err.Error())
+		log.Error().Err(err).Msg("")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "can not find the order",
+			"message": "can not find order",
 		})
 		return
 	}
