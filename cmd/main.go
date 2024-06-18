@@ -13,9 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"bytes"
+	logger "github.com/gcarrenho/common-libs/pkg/logging"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -60,6 +63,7 @@ func setupRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(
 		requestid.New(),
+		LoggingMiddleware(),
 		//middleware.RequestIDMiddleware,
 		//gin.LoggerWithConfig(logConf()),
 		gin.Recovery(),
@@ -122,4 +126,55 @@ func loadConfig() (Config, error) {
 	}
 
 	return config, err
+}
+
+func LoggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		startTime := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+
+		if raw != "" {
+			path = path + "?" + raw
+		}
+
+		c.Next()
+
+		latency := time.Since(startTime)
+		statusCode := c.Writer.Status()
+		method := c.Request.Method
+		clientIP := c.ClientIP()
+		//contentType := c.ContentType()
+		contentType := c.Request.Header.Get("Content-type")
+		requestID := c.Request.Header.Get("X-Request-ID")
+
+		logging := &logger.Logging{
+			HttpMethod:  &method,
+			Path:        &path,
+			StatusCode:  &statusCode,
+			RemoteIP:    &clientIP,
+			RequestID:   &requestID,
+			ContentType: &contentType,
+			Latency:     ptr(latency.String()),
+			StartTime:   startTime,
+			Message:     "HTTP request",
+		}
+
+		var buf bytes.Buffer
+		logger := zerolog.New(&buf).With().Timestamp().Logger()
+
+		// Log the message
+		logger.Log().Object("logging", logging).Send()
+
+		// Print the log output
+		log.Info().RawJSON("log", buf.Bytes()).Send()
+	}
+}
+
+func ptr(s string) *string {
+	return &s
+}
+
+func ptrInt64(i int64) *int64 {
+	return &i
 }

@@ -4,7 +4,8 @@ go 1.22.0
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/gcarrenho/common-libs/pkg/errordetails v0.0.0-20240618095833-b96fbc3016da
+	github.com/gcarrenho/common-libs/pkg/errordetails v0.0.0-20240618144535-b0547546fd09
+	github.com/gcarrenho/common-libs/pkg/logging v0.0.0-20240618144535-b0547546fd09
 	github.com/gin-contrib/requestid v1.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.8.1
