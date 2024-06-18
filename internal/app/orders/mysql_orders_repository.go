@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"docker-example/internal/app/orders/model"
+	errordetails "github.com/gcarrenho/common-libs/pkg/errordetails"
 )
 
 type mysqlOrdersRepository struct {
@@ -24,7 +25,7 @@ func (o *mysqlOrdersRepository) GetOrderByOrderNumber(ctx context.Context, order
 
 	err := row.Scan(&order.OrderNumber, &order.Currency, &order.Amount, &order.CreatedAt)
 	if err != nil {
-		return model.OrdersResponse{}, err
+		return model.OrdersResponse{}, errordetails.NewErrorDetails(err).Str("orderNumber", orderNumber).Msg("when scan query")
 	}
 
 	return order, nil
