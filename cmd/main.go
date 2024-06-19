@@ -138,7 +138,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 			path = path + "?" + raw
 		}
 
-		latency := time.Since(startTime)
+		latency := time.Since(startTime).String()
 		statusCode := c.Writer.Status()
 		method := c.Request.Method
 		clientIP := c.ClientIP()
@@ -152,7 +152,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 		logging.RequestID = &requestID
 		logging.RemoteIP = &clientIP
 		logging.ContentType = &contentType
-		logging.Latency = ptr(latency.String())
+		logging.Latency = &latency
 
 		c.Next()
 
@@ -172,12 +172,4 @@ func LoggingMiddleware() gin.HandlerFunc {
 		// Empty the buffer
 		buf.Reset()
 	}
-}
-
-func ptr(s string) *string {
-	return &s
-}
-
-func ptrInt64(i int64) *int64 {
-	return &i
 }
