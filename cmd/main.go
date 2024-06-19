@@ -138,36 +138,39 @@ func LoggingMiddleware() gin.HandlerFunc {
 			path = path + "?" + raw
 		}
 
-		c.Next()
-
 		latency := time.Since(startTime)
 		statusCode := c.Writer.Status()
 		method := c.Request.Method
 		clientIP := c.ClientIP()
-		//contentType := c.ContentType()
 		contentType := c.Request.Header.Get("Content-type")
-		requestID := c.Request.Header.Get("X-Request-ID")
+		requestID := c.Request.Header.Get("X-Request-Id")
 
-		logging := &logger.Logging{
-			HttpMethod:  &method,
-			Path:        &path,
-			StatusCode:  &statusCode,
-			RemoteIP:    &clientIP,
-			RequestID:   &requestID,
-			ContentType: &contentType,
-			Latency:     ptr(latency.String()),
-			StartTime:   startTime,
-			Message:     "HTTP request",
-		}
+		logging := logger.NewLogging("HTTP request")
+		logging.HttpMethod = &method
+		logging.Path = &path
+		logging.StatusCode = &statusCode
+		logging.RequestID = &requestID
+		logging.RemoteIP = &clientIP
+		logging.ContentType = &contentType
+		logging.Latency = ptr(latency.String())
 
+		c.Next()
+
+		// Create a buffer and logger
 		var buf bytes.Buffer
-		logger := zerolog.New(&buf).With().Timestamp().Logger()
+		logger := zerolog.New(&buf).With().Logger()
 
 		// Log the message
-		logger.Log().Object("logging", logging).Send()
+		logger.Log().Object("log", logging).Send()
 
 		// Print the log output
-		log.Info().RawJSON("log", buf.Bytes()).Send()
+		trimmedLog := buf.String()
+		trimmedLog = trimmedLog[:len(trimmedLog)-1] // Remove the extra newline character
+
+		log.Info().RawJSON("ginlog", []byte(trimmedLog)).Send()
+
+		// Empty the buffer
+		buf.Reset()
 	}
 }
 

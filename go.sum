@@ -19,8 +19,6 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
 github.com/gabriel-vasile/mimetype v1.4.3/go.mod h1:d8uq/6HKRL6CGdk+aubisF/M5GcPfT7nKyLpA0lbSSk=
-github.com/gcarrenho/common-libs v1.0.0 h1:CMEgO5+xKb1TDy26/bbFp262TJ2Jk8wN7g/STWFRyws=
-github.com/gcarrenho/common-libs v1.0.0/go.mod h1:agUh1nvkY4KLCi2yx5Rnn+PE9SPl5pFU8VYUABCARNg=
 github.com/gcarrenho/common-libs/pkg/errordetails v0.0.0-20240618144535-b0547546fd09 h1:R1MK/xgg8xcbcufJveKRe6JF1laQhtcL/LzDfUwWO94=
 github.com/gcarrenho/common-libs/pkg/errordetails v0.0.0-20240618144535-b0547546fd09/go.mod h1:hsVW9jBkCxxCk/v37hufe1p34WNk0gqAJWcsDCTI0h0=
 github.com/gcarrenho/common-libs/pkg/logging v0.0.0-20240618144535-b0547546fd09 h1:yYWm+IYWRzUVH9vss8X1n12x0lx0FtfYV00leCo0aeM=
